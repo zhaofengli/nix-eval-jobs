@@ -1,3 +1,4 @@
+#include <exception>
 #include <map>
 #include <iostream>
 #include <thread>
@@ -321,6 +322,8 @@ int main(int argc, char * * argv)
         /* Start a handler thread per worker process. */
         auto handler = [&]()
         {
+            std::string attrPath;
+
             try {
                 pid_t pid = -1;
                 AutoCloseFD from, to;
@@ -370,8 +373,6 @@ int main(int argc, char * * argv)
                     }
 
                     /* Wait for a job name to become available. */
-                    std::string attrPath;
-
                     while (true) {
                         checkInterrupt();
                         auto state(state_.lock());
@@ -416,7 +417,8 @@ int main(int argc, char * * argv)
                         wakeup.notify_all();
                     }
                 }
-            } catch (...) {
+            } catch (std::exception &e) {
+                std::cerr << "handler died to exception: " << e.what() << ", was processing " << attrPath << std::endl;
                 auto state(state_.lock());
                 state->exc = std::current_exception();
                 wakeup.notify_all();
