@@ -342,11 +342,6 @@ void collector(Sync<State> &state_, std::condition_variable &wakeup) {
 }
 
 int main(int argc, char **argv) {
-
-    /* Prevent undeclared dependencies in the evaluation via
-       $NIX_PATH. */
-    unsetenv("NIX_PATH");
-
     /* We are doing the garbage collection by killing forks */
     setenv("GC_DONT_GC", "1", 1);
 
